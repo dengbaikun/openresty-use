@@ -13,6 +13,13 @@ function say_hello.say(msg)
     response['success'] = true
     print(response['msg'])
     local str = cjson.encode(response)
+    print(str)
+    return str
+end
+
+function say_hello.test()
+    local str = "hello"
+    print(str)
     return str
 end
 return say_hello
