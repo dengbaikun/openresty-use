@@ -21,10 +21,8 @@ red:connect("127.0.0.1", 6379)
 red:auth("123456")
 --查询指定key的数据
 local result=red:get(key);
-
 --关闭Redis链接
 red:close()
-
 if result==nil or result==null or result==ngx.null then
     return true
 else
