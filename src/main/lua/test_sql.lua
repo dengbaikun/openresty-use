@@ -15,24 +15,24 @@ conn = env:connect("account","root","123456","127.0.0.1",3306)
 conn:execute"SET NAMES UTF8"
 
 --执行数据库操作
-cur = conn:execute("select * from test")
+cur = conn:execute("select * from test limit 1")
 
 row = cur:fetch({},"a")
 
 --文件对象的创建
-file = io.open("test.txt","w+");
+file = io.open("d:/test.txt","w+");
 
 while row do
     --var = string.format("%d %s\n", row.id, row.name)
-    for k, v in pairs(row) do
-        str = string.format("%s %s\n", k, cjson.encode(v))
-        print(str)
-    end
+    --for k, v in pairs(row) do
+    --    str = string.format("%s %s\n", k, cjson.encode(v))
+    --    print(str)
+    --end
     var = cjson.encode(row)
     print(var)
 
-    file:write(var)
-
+    file:write(var..'\n')
+--
     row = cur:fetch(row,"a")
 end
 
