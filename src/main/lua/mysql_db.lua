@@ -4,7 +4,6 @@
 --- DateTime: 2023/9/28 16:37
 ---
 -- mysql_test.lua
-package.path ='G:/openresty-1.21.4.1-win64/lualib/?.lua;;'
 local mysql = require "resty.mysql"
 local cjson = require("cjson");
 local _M = {}  -- 创建一个模块表
