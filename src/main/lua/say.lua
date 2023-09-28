@@ -11,9 +11,7 @@ function say_hello.say(msg)
     response['code'] = 200
     response['msg'] = msg
     response['success'] = true
-    print(response['msg'])
     local str = cjson.encode(response)
-    print(str)
     return str
 end
 

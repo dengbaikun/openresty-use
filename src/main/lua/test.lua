@@ -1,19 +1,25 @@
 local cjson = require("cjson");
 local redis = require "resty.redis"
-
 -- 创建一个Redis连接池
 local red = redis:new()
 
--- 设置连接超时时间（以毫秒为单位）
-red:set_timeout(1000)
--- 连接到Redis服务器
-local ok, err = red:connect("127.0.0.1", 6379)
---设置超时时间
-red:set_timeout(2000)
---设置服务器链接信息
-red:connect("127.0.0.1", 6379)
+-- 定义连接池的配置
+local redis_config = {
+    host = "127.0.0.1",   -- Redis 服务器地址
+    port = 6379,          -- Redis 服务器端口
+    timeout = 1000,       -- 连接超时时间（毫秒）
+    max_idle_timeout = 60000, -- 连接在连接池中的最大空闲时间（毫秒）
+    pool_size = 100,       -- 连接池大小
+    password = "123456"
+}
+-- 连接到 Redis 服务器
+local ok, err = red:connect(redis_config.host, redis_config.port)
+red:timeout(redis_config.timeout)
 --设置服务器链接密码
-red:auth("123456")
+red:auth(redis_config.password)
+-- 设置连接池中的最大空闲时间
+red:set_idle_timeout(redis_config.max_idle_timeout)
+--
 
 function split(inputstr, sep)
     local t = {}
