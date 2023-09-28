@@ -1,0 +1,22 @@
+#端口
+port ${PORT}
+#非保护模式
+bind 0.0.0.0
+protected-mode no
+#启用集群模式
+cluster-enabled yes
+cluster-config-file /data/nodes.conf
+#超时时间
+cluster-node-timeout 5000
+cluster-announce-ip 192.168.0.152
+cluster-announce-port ${PORT}
+cluster-announce-bus-port 1${PORT}
+#开启aof持久化策略
+appendonly yes
+#后台运行
+#daemonize yes
+pidfile  /var/run/redis_${PORT}.pid
+#密码
+requirepass dk@123456
+masterauth dk@123456
+dir /data
