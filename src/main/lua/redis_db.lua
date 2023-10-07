@@ -8,12 +8,12 @@ local redis = require('resty.redis')
 local _M = {}  -- 创建一个模块表
 -- 定义连接池的配置
 local redis_config = {
-    host = "127.0.0.1", -- Redis 服务器地址
+    host = "192.168.3.253", -- Redis 服务器地址
     port = 6379, -- Redis 服务器端口
-    timeout = 1000, -- 连接超时时间（毫秒）
+    timeout = 5000, -- 连接超时时间（毫秒）
     max_idle_timeout = 60000, -- 连接在连接池中的最大空闲时间（毫秒）
     pool_size = 100, -- 连接池大小
-    password = "123456"
+    password = "95279527"
 }
 -- 创建数据库连接池
 function _M.new()
@@ -53,7 +53,7 @@ function _M.close(red)
     end
 
     --释放连接(连接池实现)
-    local ok, err = red:set_keepalive(redis_config.max_idle_timeout, redis_config.pool_size) -- 连接在连接池中最多保持 60000 秒
+    local ok, err = red:set_keepalive(redis_config.max_idle_timeout, redis_config.pool_size) -- 连接在连接池中最多保持 100 秒
     if not ok then
         ngx.log(ngx.ERR, "set redis keepalive error : ", err)
     end

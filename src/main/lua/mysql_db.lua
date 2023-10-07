@@ -9,14 +9,14 @@ local cjson = require("cjson");
 local _M = {}  -- 创建一个模块表
 -- 定义连接池的配置
 local mysql_config = {
-    host = "127.0.0.1", -- mysql 服务器地址
-    port = 3306, -- mysql 服务器端口
+    host = "192.168.3.191", -- mysql 服务器地址
+    port = 3307, -- mysql 服务器端口
     timeout = 1000, -- 连接超时时间（毫秒）
     max_idle_timeout = 60000, -- 连接在连接池中的最大空闲时间（毫秒）
     pool_size = 100, -- 连接池大小
     user = "root",
-    password = "123456",
-    database = "account"
+    password = "rck123##2020fstest",
+    database = "talentcard-apicomponent"
 }
 -- 创建数据库连接池
 function _M.new()
