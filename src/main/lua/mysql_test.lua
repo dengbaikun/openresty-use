@@ -10,7 +10,7 @@ local cjson = require("cjson");
 local success_response = {}
 success_response["code"] = 200
 success_response["message"] = "成功"
-ngx.header.content_type = "application/json"
+ngx.header.content_type = "application/json;charset=utf8"
 -- 创建 Redis 连接
 local red, err = RedisPool.new()
 if not red then
@@ -20,6 +20,7 @@ end
 local redis_key = 'test_db================='
 local res, err = RedisPool.command(red, "get", redis_key)
 if res == ngx.null then
+    ngx.log(ngx.ERR,"get mysql db")
     -- 创建数据库连接
     local db, err = MysqlPool.new()
     if not db then
@@ -27,14 +28,14 @@ if res == ngx.null then
         return
     else
         -- 执行查询
-        local sql = "SELECT * FROM users"
+        local sql = "SELECT * FROM cgb_loan limit 10"
         local res, err = MysqlPool.query(db, sql)
         if not res then
             ngx.say("Failed to execute query: ", err)
         else
             local data = res
             res, err = RedisPool.command(red, "set", redis_key, cjson.encode(data))
-            res, err = RedisPool.command(red, "expire", redis_key, 10)
+            res, err = RedisPool.command(red, "expire", redis_key, 60)
             success_response["data"] = data
             --数据响应类型JSON
             ngx.say(cjson.encode(success_response))
@@ -53,7 +54,7 @@ if res == ngx.null then
         RedisPool.close(red)
     end
 else
-    res, err = RedisPool.command(red, "expire", redis_key, 10)
+    --ngx.log(ngx.ERR,"get redis db")
     success_response["data"] = cjson.decode(res)
     ngx.say(cjson.encode(success_response))
     RedisPool.close(red)
