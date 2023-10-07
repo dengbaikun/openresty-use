@@ -17,10 +17,9 @@ if not red then
     ngx.say("Failed to connect to the mysql_db: ", err)
     return
 end
-resp,err = red:get('test_db=================')
-ngx.log(ngx.ERR,"test_db========222222=========",resp)
-if not resp then
-    ngx.log(ngx.ERR,"test_db=============11111111====",resp)
+local resp,err = red:get('test_db=================')
+if  resp then
+    ngx.log(ngx.ERR,"get redis db")
     success_response["data"] = cjson.decode(resp)
     ngx.say(cjson.encode(success_response))
     redis_db.close(red)
@@ -38,6 +37,7 @@ local res, err = mysql_db.query(db, sql)
 if not res then
     ngx.say("Failed to execute query: ", err)
 else
+    ngx.log(ngx.ERR,"get mysql db")
     red:set('test_db=================', cjson.encode(res))
     success_response["data"] = res
     --数据响应类型JSON
