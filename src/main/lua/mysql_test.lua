@@ -19,7 +19,6 @@ if not red then
 end
 local redis_key = 'test_db================='
 local res, err = RedisPool.command(red, "get", redis_key)
-ngx.log(ngx.ERR, "get redis db :", res)
 if res == ngx.null then
     -- 创建数据库连接
     local db, err = MysqlPool.new()
@@ -27,7 +26,6 @@ if res == ngx.null then
         ngx.say("Failed to connect to the mysql_db: ", err)
         return
     else
-        ngx.log(ngx.ERR, "get mysql db ")
         -- 执行查询
         local sql = "SELECT * FROM users"
         local res, err = MysqlPool.query(db, sql)
@@ -55,7 +53,7 @@ if res == ngx.null then
         RedisPool.close(red)
     end
 else
-    ngx.log(ngx.ERR, "get redis db ")
+    res, err = RedisPool.command(red, "expire", redis_key, 10)
     success_response["data"] = cjson.decode(res)
     ngx.say(cjson.encode(success_response))
     RedisPool.close(red)
