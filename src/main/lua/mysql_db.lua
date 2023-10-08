@@ -5,7 +5,6 @@
 ---
 -- mysql_test.lua
 local mysql = require "resty.mysql"
-local cjson = require("cjson");
 local _M = {}  -- 创建一个模块表
 -- 定义连接池的配置
 local mysql_config = {
