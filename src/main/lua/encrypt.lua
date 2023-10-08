@@ -3,35 +3,11 @@
 --- Created by Administrator.
 --- DateTime: 2023/10/8 16:35
 ---
-local aes = require "resty.aes"
 local cjson = require("cjson")
--- 密钥和IV
-local key = "adfg1234asdfqwe2"
-local iv = "0000000000000000"
-function my_encrypt_function(encrypt_data)
-    encrypt_data = ngx.decode_base64(encrypt_data)
-    -- 创建 AES 实例
-    local aes_128 = aes:new(key, nil, aes.cipher(128, "cbc"), { iv = iv })
-    -- 解密
-    local decrypted = aes_128:decrypt(encrypt_data)
-    return decrypted
-end
-
--- 从请求中获取原始请求体
-local request_body = ngx.req.get_body_data()
----- 执行加密操作，例如使用加密库或算法
-local encrypted_body = my_encrypt_function(request_body)
---ngx.say(encrypted_body)
-
---ngx.say(ngx.decode_base64(request_body))
-
----- 替换请求体为加密后的内容
-ngx.req.set_body_data(encrypted_body)
---return true
--- 向后端服务器发起代理请求
-local res = ngx.location.capture("/testencrypt", { method = ngx.HTTP_POST, body = encrypted_body })
---响应数据JSON
-ngx.header.content_type = res.header['Content-Type']
-ngx.status = res.status
-ngx.say(res.body)
-
+local AesTool = require("aes_tool")
+--ngx.say(ngx.arg[1])
+ngx.log(ngx.ERR,"asd:",ngx.arg[1])
+--ngx.log(ngx.ERR,"asd:",response)
+-- ngx.arg 是一个数组下标1 是数据，下标2代表的结束设置为true
+ngx.arg[1] = AesTool.encrypt(ngx.arg[1])
+ngx.arg[2] = true
