@@ -1,6 +1,6 @@
 require 'config'
 local match = string.match
-local ngxmatch=ngx.re.match
+local ngxmatch=ngx.re.find
 local unescape=ngx.unescape_uri
 local get_headers = ngx.req.get_headers
 local optionIsOn = function (options) return options == "on" and true or false end
@@ -108,6 +108,7 @@ function args()
     for _,rule in pairs(argsrules) do
         local args = ngx.req.get_uri_args()
         for key, val in pairs(args) do
+            ngx.log(ngx.ERR,"args key:",key," val:",val)
             if type(val)=='table' then
                  local t={}
                  for k,v in pairs(val) do
@@ -148,7 +149,7 @@ function ua()
     local ua = ngx.var.http_user_agent
     if ua ~= nil then
         for _,rule in pairs(uarules) do
-            if rule ~="" and ngxmatch(ua,rule,"isjo") then
+            if rule ~="" and ngxmatch(ua,rule,"isjo")  then
                 log('UA',ngx.var.request_uri,"-",rule)
                 say_html()
             return true
