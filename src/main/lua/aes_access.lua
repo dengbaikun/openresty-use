@@ -8,6 +8,10 @@ local AesTool = require "aes_tool"
 local request_body = ngx.req.get_body_data()
 ---- 执行加密操作，例如使用加密库或算法
 local encrypted_body = AesTool.decrypt(request_body)
+if encrypted_body == nil then
+    ngx.exit(403)
+    return false
+end
 ---- 替换请求体为加密后的内容
 ngx.req.set_body_data(encrypted_body)
 return true
