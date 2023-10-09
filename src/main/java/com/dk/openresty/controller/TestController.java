@@ -14,12 +14,12 @@ import java.util.Map;
  * @version V1.0.0
  * @date 2023/10/8 16:56
  */
-@RestController("/test")
+@RestController
 @Slf4j
 public class TestController {
 
 
-    @RequestMapping
+    @RequestMapping("/test")
     public Object index(@RequestBody String body) {
         log.info("body=[{}]", body);
         Map<String, Object> map = new HashMap<>();
