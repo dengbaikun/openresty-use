@@ -62,10 +62,11 @@ local privkey, err = pkey.new(private_key_pem)
 -- 要加密的数据
 --local pub_pem = privkey:to_PEM("public")
 local pubkey, err = pkey.new(public_key_pem)
-local encrypted_data = pubkey:encrypt(data_to_encrypt, pkey.PADDINGS.RSA_PKCS1_OAEP_PADDING)
---local encrypted_data = pubkey:encrypt(data_to_encrypt, pkey.PADDINGS.RSA_NO_PADDING)
+--local encrypted_data = pubkey:encrypt(data_to_encrypt, pkey.PADDINGS.RSA_PKCS1_PADDING)
+local encrypted_data = "ebJ7IQSs3LMoOAHICmbswAMynEUjm6GzT9p7dDfuFsfBnpXFR2a0CGP0IFDfC0Gpnc9PBPSJlHZcsOk6oNRRJbjc3d3tc+jyZ2ZVQ8ZwvDPk7VLasqx4+vWeX57RtOMG6NFzX7/ulb10drf0qxQuoanXoJLSS/wVTlW7S/k+8fU="
+encrypted_data = ngx.decode_base64(encrypted_data)
 -- 执行加密操作
-local decrypted_data = privkey:decrypt(encrypted_data, pkey.PADDINGS.RSA_PKCS1_OAEP_PADDING)
+local decrypted_data = privkey:decrypt(encrypted_data, pkey.PADDINGS.RSA_PKCS1_PADDING)
 ngx.say("Original data: " .. data_to_encrypt)
 ngx.say("Encrypted data: " .. ngx.encode_base64(encrypted_data))
 ngx.say("Decrypted data: " .. decrypted_data)
