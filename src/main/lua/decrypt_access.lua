@@ -4,10 +4,17 @@
 --- DateTime: 2023/10/8 16:35
 ---
 local AesTool = require "aes_tool"
+local RsaTool = require("rsa_tool")
+local CryptographyType = ngx.req.get_headers()["Cryptography"]
+ngx.log(ngx.ERR,"CryptographyType decrypt:",CryptographyType)
+local Cryptography = AesTool
+if CryptographyType == 'RSA' then
+    Cryptography = RsaTool
+end
 -- 从请求中获取原始请求体
 local request_body = ngx.req.get_body_data()
 ---- 执行加密操作，例如使用加密库或算法
-local encrypted_body = AesTool.decrypt(request_body)
+local encrypted_body = Cryptography.decrypt(request_body)
 if encrypted_body == nil then
     ngx.exit(403)
     return false

@@ -5,6 +5,13 @@
 ---
 local cjson = require("cjson")
 local AesTool = require("aes_tool")
+local RsaTool = require("rsa_tool")
+local CryptographyType = ngx.req.get_headers()["Cryptography"]
+ngx.log(ngx.ERR,"CryptographyType encrypt:",CryptographyType)
+local Cryptography = AesTool
+if CryptographyType == 'RSA' then
+    Cryptography = RsaTool
+end
 ----ngx.say(ngx.arg[1])
 --ngx.log(ngx.ERR,"asd:", ngx.arg[1])
 ----ngx.log(ngx.ERR,"asd:",response)
@@ -36,7 +43,7 @@ if status == 200 then
         ngx.ctx.buffered = nil
         ngx.log(ngx.ERR,"whole:",whole)
         -- 进行你所需要进行的处理
-        whole = AesTool.encrypt(whole)
+        whole = Cryptography.encrypt(whole)
 
         -- 重新赋值响应数据，以修改后的内容作为最终响应
         ngx.arg[1] = whole
