@@ -7,33 +7,49 @@
 local RedisPool = require "redis_db"
 local scripts = [[                                              -- 运行在 Redis 里的 Lua 代码
     local key = KEYS[1]                                         -- 获取键值
-    local limit = ARGV[1] or 100                                -- 获取第一个参数，限制数量
-    local time  = ARGV[2] or 60                                 -- 第二个参数，限制时间
-
+    local ip = ARGV[1]
+    local limit = ARGV[2] or 10                                -- 获取第一个参数，限制数量
+    local time  = ARGV[3] or 60                                 -- 第二个参数，限制时间
+    local black_ip_key = "black_ip:".. ip
+    local is_block = redis.call("get",black_ip_key)             -- 获取ip黑名单 该ip是否存在 存在直接返回不允许
+    if  tonumber(is_block) == 1 then
+        return 'dany'
+    end
     local count = redis.call("incr", key)                       -- 计数器增加
-
-
     if count == 1 then                                          -- 是否是第一次访问
         redis.call('expire', key, time)                         -- 设置过期时间
     end
-    return count >= limit and 'dany' or 'allow'                  -- 检查访问数量限制，返回 deny 或 allow
+    if count >= limit then                                      -- 检查访问数量限制，返回 deny 或 allow
+        --如果大于访问数量限制 则将ip放在ip黑名单中 设置过期时间1分钟 禁止1分钟访问
+        redis.call('set', black_ip_key, 1)
+        redis.call('expire', black_ip_key, 60)
+        return 'dany'
+    end
+    return 'allow'
 ]]
+
+
+
 local clientIP = ngx.req.get_headers()["X-Real-IP"]
 if clientIP == nil then
     clientIP = ngx.req.get_headers()["x_forwarded_for"]
-end if clientIP == nil then
+end
+if clientIP == nil then
     clientIP = ngx.var.remote_addr
 end
+local uri = ngx.var.uri
+local key = "access_statistics:"..uri .. ":" .. clientIP
 local red, err = RedisPool.new()
 if not red then
     ngx.say("Failed to connect to Redis: ", err)
     return
 end
-local res, err = RedisPool.command(red, "eval", scripts,1, clientIP)
+local res, err = RedisPool.command(red, "eval", scripts, 1, key, clientIP)
 --res, err = rds:eval(                                            -- 向 Redis 发送脚本
 --        scripts, 1, 'client_addr')                          -- 传递 key，其他参数使用默认值
 RedisPool.close(red) -- 归回连接
-if res == 'allow' then                                          -- 检查脚本的执行结果
+if res == 'allow' then
+    -- 检查脚本的执行结果
     return true
 else
     ngx.exit(ngx.HTTP_FORBIDDEN)
