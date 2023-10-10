@@ -8,12 +8,12 @@ local redis = require('resty.redis')
 local _M = {}  -- 创建一个模块表
 -- 定义连接池的配置
 local redis_config = {
-    host = "192.168.3.253", -- Redis 服务器地址
+    host = "127.0.0.1", -- Redis 服务器地址
     port = 6379, -- Redis 服务器端口
     timeout = 5000, -- 连接超时时间（毫秒）
     max_idle_timeout = 60000, -- 连接在连接池中的最大空闲时间（毫秒）
     pool_size = 100, -- 连接池大小
-    password = "95279527"
+    password = "123456"
 }
 -- 创建数据库连接池
 function _M.new()
@@ -26,12 +26,16 @@ function _M.new()
 
     if not ok then
         ngx.log(ngx.ERR, "failed to connect to Redis: ", err)
+        red:close()                                                 -- 连接失败需要及时关闭释放连接
         return nil, err
     end
-    local ok, err = red:auth(redis_config.password)
-    if not ok then
-        ngx.log(ngx.ERR, "Redis auth fail: ", err)
-        return nil, err
+    local count, err = red:get_reused_times()                             -- 获取复用次数
+    if count < 1 then
+        local ok, err = red:auth(redis_config.password)
+        if not ok then
+            ngx.log(ngx.ERR, "Redis auth fail: ", err)
+            return nil, err
+        end
     end
     return red, nil  -- 返回 Redis 连接对象
 end
