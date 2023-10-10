@@ -15,7 +15,8 @@ local mysql_config = {
     pool_size = 100, -- 连接池大小
     user = "root",
     password = "rck123##2020fstest",
-    database = "talentcard-apicomponent"
+    database = "talentcard-apicomponent",
+    charset = 'utf8mb4'
 }
 -- 创建数据库连接池
 function _M.new()
@@ -32,7 +33,8 @@ function _M.new()
         port = mysql_config.port, -- 数据库端口
         database = mysql_config.database, -- 数据库名
         user = mysql_config.user, -- 数据库用户名
-        password = mysql_config.password  -- 数据库密码
+        password = mysql_config.password,  -- 数据库密码
+        charset = mysql_config.charset  --使用的字符集
     })
 
     if not ok then

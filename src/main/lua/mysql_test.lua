@@ -33,13 +33,23 @@ if res == ngx.null then
         if not res then
             ngx.say("Failed to execute query: ", err)
         else
+            --for i,rows in ipairs(res) do                                    -- 遍历结果集数组
+            --    for k,v in pairs(rows) do                                   -- 逐个输出记录里的字段和值
+            --        ngx.print(k, " = ", v, ";")
+            --    end
+            --end
+            --for i,rows in ipairs(res) do                                    -- 遍历结果集数组
+            --    ngx.print(cjson.encode(rows))
+            --end
             local data = res
             res, err = RedisPool.command(red, "set", redis_key, cjson.encode(data))
             res, err = RedisPool.command(red, "expire", redis_key, 60)
             success_response["data"] = data
-            --数据响应类型JSON
+            ----数据响应类型JSON
             ngx.say(cjson.encode(success_response))
             --ngx.log(ngx.ERR,"res type :",type(res))
+            --local str = "';show table"                                      -- 可能有危险的 SQL 语句
+            --ngx.say(ngx.quote_sql_str(str))                                 -- 转换为安全的字符串
             ---- 处理查询结果
             --for i, row in ipairs(res) do
             --    ngx.say("TYPE ",type(row))
