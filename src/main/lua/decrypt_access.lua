@@ -5,18 +5,27 @@
 ---
 local AesTool = require "aes_tool"
 local RsaTool = require("rsa_tool")
+local LogTool = require "log_tool"
 local CryptographyType = ngx.req.get_headers()["Cryptography"]
 ngx.log(ngx.ERR,"CryptographyType decrypt:",CryptographyType)
 local Cryptography = AesTool
 if CryptographyType == 'RSA' then
     Cryptography = RsaTool
 end
+local args = ngx.req.get_uri_args()
+for key, val in pairs(args) do
+    --ngx.log(ngx.ERR,"args key:",key," val:",val)
+    LogTool.log(key..":"..val)
+end
+ngx.req.read_body()
 -- 从请求中获取原始请求体
 local request_body = ngx.req.get_body_data()
+ngx.log(ngx.ERR,"request_body:",request_body)
+
 ---- 执行加密操作，例如使用加密库或算法
 local encrypted_body = Cryptography.decrypt(request_body)
 if encrypted_body == nil then
-    ngx.exit(403)
+    ngx.exit(ngx.HTTP_FORBIDDEN)
     return false
 end
 ---- 替换请求体为加密后的内容

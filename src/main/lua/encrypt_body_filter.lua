@@ -22,7 +22,7 @@ end
 local chunk, eof = ngx.arg[1], ngx.arg[2]
 local status = ngx.status
 --ngx.log(ngx.ERR, "Response status: " .. status)
-if status == 200 then
+if status == ngx.HTTP_OK then
     -- 定义全局变量，收集全部响应
     if ngx.ctx.buffered == nil then
         ngx.ctx.buffered = {}

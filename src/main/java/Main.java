@@ -10,6 +10,7 @@ import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Date;
 
 /**
  * @author DK
@@ -101,5 +102,6 @@ public class Main {
             priPemWriter.writeObject(new PemObject(privateKeyPrefix, sbk.getEncoded()));
             pubPemWriter.writeObject(new PemObject(publicKeyPrefix, pbk.getEncoded()));
         }
+        System.out.println(new Date().getTime());
     }
 }

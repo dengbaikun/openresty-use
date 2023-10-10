@@ -7,12 +7,9 @@
 local RedisPool = require "redis_db"
 local scripts = [[                                              -- 运行在 Redis 里的 Lua 代码
     local key = KEYS[1]                                         -- 获取键值
-    local limit = ARGV[1] or 100                                -- 获取第一个参数，限制数量
+    local limit = ARGV[1] or 10                                -- 获取第一个参数，限制数量
     local time  = ARGV[2] or 60                                 -- 第二个参数，限制时间
-
     local count = redis.call("incr", key)                       -- 计数器增加
-
-
     if count == 1 then                                          -- 是否是第一次访问
         redis.call('expire', key, time)                         -- 设置过期时间
     end
@@ -24,12 +21,14 @@ if clientIP == nil then
 end if clientIP == nil then
     clientIP = ngx.var.remote_addr
 end
+local uri = ngx.var.uri;
+local key = clientIP .. "-" ..uri
 local red, err = RedisPool.new()
 if not red then
     ngx.say("Failed to connect to Redis: ", err)
     return
 end
-local res, err = RedisPool.command(red, "eval", scripts,1, clientIP)
+local res, err = RedisPool.command(red, "eval", scripts,1, key)
 --res, err = rds:eval(                                            -- 向 Redis 发送脚本
 --        scripts, 1, 'client_addr')                          -- 传递 key，其他参数使用默认值
 RedisPool.close(red) -- 归回连接
