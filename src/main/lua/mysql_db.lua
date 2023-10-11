@@ -33,8 +33,9 @@ function _M.new()
         port = mysql_config.port, -- 数据库端口
         database = mysql_config.database, -- 数据库名
         user = mysql_config.user, -- 数据库用户名
-        password = mysql_config.password,  -- 数据库密码
-        charset = mysql_config.charset  --使用的字符集
+        password = mysql_config.password, -- 数据库密码
+        charset = mysql_config.charset, --使用的字符集
+        max_packet_size = 1024 * 1024 * 4
     })
 
     if not ok then

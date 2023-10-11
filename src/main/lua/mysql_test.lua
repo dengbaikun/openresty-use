@@ -27,8 +27,14 @@ if res == ngx.null then
         ngx.say("Failed to connect to the mysql_db: ", err)
         return
     else
+        local id = ngx.req.get_uri_args()["id"];
+        ngx.log(ngx.ERR,'id:',id)
         -- 执行查询
-        local sql = "SELECT * FROM cgb_loan limit 10"
+        local sql = [[SELECT * FROM cgb_loan where id = %s]]
+        sql =string.format(sql,
+                ndk.set_var.set_quote_sql_str(id))
+        --sql =string.format(sql,id)
+        ngx.log(ngx.ERR,'sql:',sql)
         local res, err = MysqlPool.query(db, sql)
         if not res then
             ngx.say("Failed to execute query: ", err)
@@ -42,14 +48,15 @@ if res == ngx.null then
             --    ngx.print(cjson.encode(rows))
             --end
             local data = res
-            res, err = RedisPool.command(red, "set", redis_key, cjson.encode(data))
-            res, err = RedisPool.command(red, "expire", redis_key, 60)
+            --res, err = RedisPool.command(red, "set", redis_key, cjson.encode(data))
+            --res, err = RedisPool.command(red, "expire", redis_key, 60)
             success_response["data"] = data
             ----数据响应类型JSON
             ngx.say(cjson.encode(success_response))
             --ngx.log(ngx.ERR,"res type :",type(res))
             --local str = "';show table"                                      -- 可能有危险的 SQL 语句
             --ngx.say(ngx.quote_sql_str(str))                                 -- 转换为安全的字符串
+            --ngx.say(  ndk.set_var.set_quote_sql_str(str))
             ---- 处理查询结果
             --for i, row in ipairs(res) do
             --    ngx.say("TYPE ",type(row))
