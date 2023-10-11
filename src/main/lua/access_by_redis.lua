@@ -28,8 +28,6 @@ local scripts = [[                                              -- 运行在 Red
     return 'allow'
 ]]
 
-
-
 local clientIP = ngx.req.get_headers()["X-Real-IP"]
 if clientIP == nil then
     clientIP = ngx.req.get_headers()["x_forwarded_for"]
@@ -38,15 +36,13 @@ if clientIP == nil then
     clientIP = ngx.var.remote_addr
 end
 local uri = ngx.var.uri
-local key = "access_statistics:"..uri .. ":" .. clientIP
-local red, err = RedisPool:new({db_index=1})
+local key = "access_statistics:" .. uri .. ":" .. clientIP
+local red, err = RedisPool:new({ db_index = 1 })
 if not red then
     ngx.say("Failed to connect to Redis: ", err)
     return
 end
 local res, err = red:eval(scripts, 1, key, clientIP)
---res, err = rds:eval(                                            -- 向 Redis 发送脚本
---        scripts, 1, 'client_addr')                          -- 传递 key，其他参数使用默认值
 if res == 'allow' then
     -- 检查脚本的执行结果
     return true
