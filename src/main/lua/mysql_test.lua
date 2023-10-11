@@ -5,7 +5,7 @@
 ---
 ---
 local MysqlPool = require "mysql_tool"
-local RedisPool = require "redis_db"
+local RedisPool = require "redis_tool"
 local cjson = require("cjson");
 local success_response = {}
 success_response["code"] = 200
@@ -18,13 +18,13 @@ if not red then
     return
 end
 local uri = ngx.var.uri
-local args  = ngx.var.args
-ngx.log(ngx.ERR,"args:",args)
+local args =ngx.var.args
+if args == nil then
+    args = ''
+end
 local redis_key = 'mysql_data:'..uri..":" .. args
 local res, err = red:get(redis_key)
-ngx.log(ngx.ERR, "redis result:", res)
-if res ~= ngx.null then
-    ngx.log(ngx.ERR, "get redis db")
+if res ~= ngx.null and res ~=nil then
     success_response["data"] = cjson.decode(res)
     ngx.say(cjson.encode(success_response))
     return
@@ -39,8 +39,8 @@ else
     local id = ngx.req.get_uri_args()["id"];
     ngx.log(ngx.ERR, 'id:', id)
     -- 执行查询
-    local sql = [[SELECT * FROM sys_route_conf where id = %s]]
-    sql = string.format(sql, ngx.quote_sql_str(id))
+    local sql = [[SELECT * FROM cgb_loan limit 1]]
+    --sql = string.format(sql, ngx.quote_sql_str(id))
     local res, err = mysql:query(sql)
     if not res then
         ngx.say("Failed to execute query: ", err)
@@ -54,8 +54,8 @@ else
         --    ngx.print(cjson.encode(rows))
         --end
         local data = res
-        res, err = red:set(redis_key, cjson.encode(data))
-        res, err = red:expire(redis_key, 60)
+        --res, err = red:set(redis_key, cjson.encode(data))
+        --res, err = red:expire(redis_key, 3600)
         success_response["data"] = data
         ----数据响应类型JSON
         ngx.say(cjson.encode(success_response))

@@ -52,14 +52,14 @@ end
 function _M.new(self, opts)
     opts = opts or {}
     opts = opts or {}
-    local host = opts.host or "127.0.0.1" -- mysql 服务器地址
-    local port = opts.port or 3306 -- mysql 服务器端口
+    local host = opts.host or "192.168.3.191" -- mysql 服务器地址
+    local port = opts.port or 3307 -- mysql 服务器端口
     local timeout = (opts.timeout and opts.timeout * 1000) or 1000
     local max_idle_timeout = (opts.max_idle_timeout and opts.max_idle_timeout * 1000) or 60000 -- 连接在连接池中的最大空闲时间（毫秒）
     local pool_size = opts.pool_size or 100 -- 连接池大小
     local user = opts.user or "root" -- 连接池大小
-    local password = opts.password or '123456'
-    local database = opts.database or 'account'
+    local password = opts.password or 'rck123##2020fstest'
+    local database = opts.database or 'talentcard-apicomponent'
     local charset = opts.charset or 'utf8mb4'
     local max_packet_size = 1024 * 1024 * 4
 
