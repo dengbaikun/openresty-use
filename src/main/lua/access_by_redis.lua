@@ -4,7 +4,7 @@
 --- DateTime: 2023/9/26 16:44
 ---
 ---
-local RedisPool = require "redis_db"
+local RedisPool = require "redis_tool"
 local scripts = [[                                              -- 运行在 Redis 里的 Lua 代码
     local key = KEYS[1]                                         -- 获取键值
     local ip = ARGV[1]
@@ -39,15 +39,14 @@ if clientIP == nil then
 end
 local uri = ngx.var.uri
 local key = "access_statistics:"..uri .. ":" .. clientIP
-local red, err = RedisPool.new()
+local red, err = RedisPool:new({db_index=1})
 if not red then
     ngx.say("Failed to connect to Redis: ", err)
     return
 end
-local res, err = RedisPool.command(red, "eval", scripts, 1, key, clientIP)
+local res, err = red:eval(scripts, 1, key, clientIP)
 --res, err = rds:eval(                                            -- 向 Redis 发送脚本
 --        scripts, 1, 'client_addr')                          -- 传递 key，其他参数使用默认值
-RedisPool.close(red) -- 归回连接
 if res == 'allow' then
     -- 检查脚本的执行结果
     return true
