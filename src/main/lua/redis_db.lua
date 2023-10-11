@@ -13,7 +13,8 @@ local redis_config = {
     timeout = 5000, -- 连接超时时间（毫秒）
     max_idle_timeout = 60000, -- 连接在连接池中的最大空闲时间（毫秒）
     pool_size = 100, -- 连接池大小
-    password = "123456"
+    password = "123456",
+    db_index = 0,
 }
 -- 创建数据库连接池
 function _M.new()
@@ -37,6 +38,7 @@ function _M.new()
             return nil, err
         end
     end
+    red:select(redis_config.db_index)
     return red, nil  -- 返回 Redis 连接对象
 end
 -- 执行 Redis 命令
