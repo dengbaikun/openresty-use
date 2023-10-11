@@ -36,7 +36,7 @@ function _M.query(self, sql, ...)
         ngx.log(ngx.ERR, "failed to connect to database: ", err, ": ", errno, " ", sqlstate)
         return nil, err
     end
-    local res, err, errno, sqlstate = mysql:query(sql,...)
+    local res, err, errno, sqlstate = mysql:query(sql, ...)
     if self._reqs then
         table.insert(self._reqs, { cmd, ... })
         return
@@ -72,6 +72,7 @@ function _M.new(self, opts)
         password = password,
         user = user,
         database = database,
+        charset = charset,
         max_packet_size = max_packet_size, }, mt)
 end
 
