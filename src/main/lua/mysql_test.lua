@@ -40,7 +40,7 @@ else
     ngx.log(ngx.ERR, 'id:', id)
     -- 执行查询
     local sql = [[SELECT * FROM sys_route_conf where id = %s]]
-    sql = string.format(sql, ndk.set_var.set_quote_sql_str(id))
+    sql = string.format(sql, ngx.quote_sql_str(id))
     local res, err = mysql:query(sql)
     if not res then
         ngx.say("Failed to execute query: ", err)
