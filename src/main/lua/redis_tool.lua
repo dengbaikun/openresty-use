@@ -198,11 +198,13 @@ local function do_command(self, cmd, ...)
 
     local redis, err = redis_c:new()
     if not redis then
+        ngx.log(ngx.ERR, "failed to create redis object: ", err)
         return nil, err
     end
 
     local ok, err = self:connect_mod(redis)
     if not ok or err then
+        ngx.log(ngx.ERR, "failed to connect to redis: ", err)
         return nil, err
     end
 
@@ -227,8 +229,8 @@ function _M.new(self, opts)
     local host = opts.host or  "127.0.0.1" -- Redis 服务器地址
     local port = opts.port or  6379 -- Redis 服务器端口
     local timeout = (opts.timeout and opts.timeout * 1000) or 1000
-    local max_idle_timeout = 60000 -- 连接在连接池中的最大空闲时间（毫秒）
-    local pool_size = 1000 -- 连接池大小
+    local max_idle_timeout = (opts.max_idle_timeout and opts.max_idle_timeout * 1000) or 60000 -- 连接在连接池中的最大空闲时间（毫秒）
+    local pool_size = opts.pool_size or 1000 -- 连接池大小
     local password = opts.password or '123456'
     local db_index = opts.db_index or 0
 

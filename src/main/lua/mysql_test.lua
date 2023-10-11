@@ -4,7 +4,7 @@
 --- DateTime: 2023/9/28 16:43
 ---
 ---
-local MysqlPool = require "mysql_db"
+local MysqlPool = require "mysql_tool"
 local RedisPool = require "redis_db"
 local cjson = require("cjson");
 local success_response = {}
@@ -17,62 +17,59 @@ if not red then
     ngx.say("Failed to connect to Redis: ", err)
     return
 end
-local redis_key = 'test_db================='
-local res, err = RedisPool.command(red, "get", redis_key)
-if res == ngx.null then
-    ngx.log(ngx.ERR,"get mysql db")
-    -- 创建数据库连接
-    local db, err = MysqlPool.new()
-    if not db then
-        ngx.say("Failed to connect to the mysql_db: ", err)
-        return
-    else
-        local id = ngx.req.get_uri_args()["id"];
-        ngx.log(ngx.ERR,'id:',id)
-        -- 执行查询
-        local sql = [[SELECT * FROM cgb_loan where id = %s]]
-        sql =string.format(sql,
-                ndk.set_var.set_quote_sql_str(id))
-        --sql =string.format(sql,id)
-        ngx.log(ngx.ERR,'sql:',sql)
-        local res, err = MysqlPool.query(db, sql)
-        if not res then
-            ngx.say("Failed to execute query: ", err)
-        else
-            --for i,rows in ipairs(res) do                                    -- 遍历结果集数组
-            --    for k,v in pairs(rows) do                                   -- 逐个输出记录里的字段和值
-            --        ngx.print(k, " = ", v, ";")
-            --    end
-            --end
-            --for i,rows in ipairs(res) do                                    -- 遍历结果集数组
-            --    ngx.print(cjson.encode(rows))
-            --end
-            local data = res
-            --res, err = RedisPool.command(red, "set", redis_key, cjson.encode(data))
-            --res, err = RedisPool.command(red, "expire", redis_key, 60)
-            success_response["data"] = data
-            ----数据响应类型JSON
-            ngx.say(cjson.encode(success_response))
-            --ngx.log(ngx.ERR,"res type :",type(res))
-            --local str = "';show table"                                      -- 可能有危险的 SQL 语句
-            --ngx.say(ngx.quote_sql_str(str))                                 -- 转换为安全的字符串
-            --ngx.say(  ndk.set_var.set_quote_sql_str(str))
-            ---- 处理查询结果
-            --for i, row in ipairs(res) do
-            --    ngx.say("TYPE ",type(row))
-            --    ngx.log(ngx.ERR,"row:",cjson.encode(row))
-            --    ngx.log(ngx.ERR,"row concat:",table.concat(row))
-            --    ngx.say("Row ", i, "role: ", row['role'])
-            --    ngx.say("Row ", i, ": ", cjson.encode(row))
-            --end
-        end
-        --释放数据库连接
-        MysqlPool.close(db)
-        RedisPool.close(red)
-    end
-else
-    --ngx.log(ngx.ERR,"get redis db")
+local uri = ngx.var.uri
+local args  = ngx.var.args
+ngx.log(ngx.ERR,"args:",args)
+local redis_key = 'mysql_data:'..uri..":" .. args
+local res, err = red:get(redis_key)
+ngx.log(ngx.ERR, "redis result:", res)
+if res ~= ngx.null then
+    ngx.log(ngx.ERR, "get redis db")
     success_response["data"] = cjson.decode(res)
     ngx.say(cjson.encode(success_response))
-    RedisPool.close(red)
+    return
+end
+ngx.log(ngx.ERR, "get mysql db")
+-- 创建数据库连接
+local mysql, err = MysqlPool.new()
+if not mysql then
+    ngx.say("Failed to connect to the mysql_db: ", err)
+    return
+else
+    local id = ngx.req.get_uri_args()["id"];
+    ngx.log(ngx.ERR, 'id:', id)
+    -- 执行查询
+    local sql = [[SELECT * FROM sys_route_conf where id = %s]]
+    sql = string.format(sql, ndk.set_var.set_quote_sql_str(id))
+    local res, err = mysql:query(sql)
+    if not res then
+        ngx.say("Failed to execute query: ", err)
+    else
+        --for i,rows in ipairs(res) do                                    -- 遍历结果集数组
+        --    for k,v in pairs(rows) do                                   -- 逐个输出记录里的字段和值
+        --        ngx.print(k, " = ", v, ";")
+        --    end
+        --end
+        --for i,rows in ipairs(res) do                                    -- 遍历结果集数组
+        --    ngx.print(cjson.encode(rows))
+        --end
+        local data = res
+        res, err = red:set(redis_key, cjson.encode(data))
+        res, err = red:expire(redis_key, 60)
+        success_response["data"] = data
+        ----数据响应类型JSON
+        ngx.say(cjson.encode(success_response))
+        --ngx.log(ngx.ERR,"res type :",type(res))
+        --local str = "';show table"                                      -- 可能有危险的 SQL 语句
+        --ngx.say(ngx.quote_sql_str(str))                                 -- 转换为安全的字符串
+        --ngx.say(  ndk.set_var.set_quote_sql_str(str))
+        ---- 处理查询结果
+        --for i, row in ipairs(res) do
+        --    ngx.say("TYPE ",type(row))
+        --    ngx.log(ngx.ERR,"row:",cjson.encode(row))
+        --    ngx.log(ngx.ERR,"row concat:",table.concat(row))
+        --    ngx.say("Row ", i, "role: ", row['role'])
+        --    ngx.say("Row ", i, ": ", cjson.encode(row))
+        --end
+    end
 end
