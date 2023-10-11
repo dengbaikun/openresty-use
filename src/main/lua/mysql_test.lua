@@ -54,8 +54,8 @@ else
         --    ngx.print(cjson.encode(rows))
         --end
         local data = res
-        --res, err = red:set(redis_key, cjson.encode(data))
-        --res, err = red:expire(redis_key, 3600)
+        res, err = red:set(redis_key, cjson.encode(data))
+        res, err = red:expire(redis_key, 60)
         success_response["data"] = data
         ----数据响应类型JSON
         ngx.say(cjson.encode(success_response))
