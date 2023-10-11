@@ -25,7 +25,7 @@ end
 local redis_key = 'mysql_data:'..uri..":" .. args
 local res, err = red:get(redis_key)
 if res ~= ngx.null and res ~=nil then
-    success_response["data"] = cjson.decode(res)
+    success_response["data"] = cjson.decode(setmetatable(res, cjson.empty_array_mt))
     ngx.say(cjson.encode(success_response))
     return
 end
@@ -39,8 +39,8 @@ else
     local id = ngx.req.get_uri_args()["id"];
     ngx.log(ngx.ERR, 'id:', id)
     -- 执行查询
-    local sql = [[SELECT * FROM cgb_loan limit 1]]
-    --sql = string.format(sql, ngx.quote_sql_str(id))
+    local sql = [[SELECT * FROM cgb_loan where id =%s]]
+    sql = string.format(sql, ngx.quote_sql_str(id))
     local res, err = mysql:query(sql)
     if not res then
         ngx.say("Failed to execute query: ", err)
@@ -53,7 +53,7 @@ else
         --for i,rows in ipairs(res) do                                    -- 遍历结果集数组
         --    ngx.print(cjson.encode(rows))
         --end
-        local data = res
+        local data =  setmetatable(res, cjson.empty_array_mt)
         res, err = red:set(redis_key, cjson.encode(data))
         res, err = red:expire(redis_key, 60)
         success_response["data"] = data
