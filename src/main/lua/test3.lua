@@ -3,37 +3,63 @@
 --- Created by Administrator.
 --- DateTime: 2023/10/11 14:35
 ---
-opts = opts or {}
-local host = opts.host or "192.168.3.253" -- Redis 服务器地址
-local port = opts.port or 6379 -- Redis 服务器端口
-local timeout = (opts.timeout and opts.timeout * 1000) or 1000
-local max_idle_timeout = (opts.max_idle_timeout and opts.max_idle_timeout * 1000) or 60000 -- 连接在连接池中的最大空闲时间（毫秒）
-local pool_size = opts.pool_size or 1000 -- 连接池大小
-local password = opts.password or '95279527'
-local db_index = opts.db_index or 0
-local config = {
-    host = host, -- Redis 服务器地址
-    port = port, -- Redis 服务器端口
-    timeout = timeout, -- 连接超时时间（毫秒）
-    max_idle_timeout = max_idle_timeout, -- 连接在连接池中的最大空闲时间（毫秒）
-    pool_size = pool_size, -- 连接池大小
-    password = password,
-    db_index = db_index,
-    _reqs = nil }
+package.path ='G:/openresty-1.21.4.1-win64/lualib/?.lua'
+require "resty.core.regex"
 
-local ok, new_tab = pcall(require, "table.new")
-if not ok or type(new_tab) ~= "function" then
-    new_tab = function(narr, nrec)
-        return {}
+
+-- 纯 lua 版本，优点是兼容性好，可以适用任何 lua 语言环境
+function check_hex_lua( str )
+    if "string" ~= type(str) then
+        return false
     end
+
+    for i = 1, #str do
+        local ord = str:byte(i)
+        if not (
+                (48 <= ord and ord <= 57) or
+                        (65 <= ord and ord <= 70) or
+                        (97 <= ord and ord <= 102)
+        ) then
+            return false
+        end
+    end
+    return true
 end
 
-local m = new_tab(0, 155)
-m._VERSION = '0.01'
-m.version = 1.1
-for key, val in pairs(config) do
-    m[key] = val
+-- 使用 ngx.re.* 完成，没有使用任何调优参数
+function check_hex_default( str )
+    if "string" ~= type(str) then
+        return false
+    end
+
+    return ngx.re.find(str, "[^0-9a-fA-F]") == nil
 end
-for key, val in pairs(m) do
-    print('key:', key, ',val:', val)
+
+-- 使用 ngx.re.* 完成，使用调优参数 "jo"
+function check_hex_jo( str )
+    if "string" ~= type(str) then
+        return false
+    end
+
+    return ngx.re.find(str, "[^0-9a-fA-F]", "jo") == nil
 end
+
+
+-- 下面就是测试用例部分代码
+function do_test( name, fun )
+    ngx.update_time()
+    local start = ngx.now()
+
+    local t = "012345678901234567890123456789abcdefABCDEF"
+    assert(fun(t))
+    for i=1,10000*300 do
+        fun(t)
+    end
+
+    ngx.update_time()
+    print(name, "\ttimes:", ngx.now() - start)
+end
+
+do_test("check_hex_lua", check_hex_lua)
+do_test("check_hex_default", check_hex_default)
+do_test("check_hex_jo", check_hex_jo)
