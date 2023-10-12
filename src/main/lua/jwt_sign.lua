@@ -3,6 +3,7 @@
 --- Created by Administrator.
 --- DateTime: 2023/10/12 16:01
 ---
+package.path ='F:/IdeaProject/openresty/openresty/src/main/lua/lua-resty-jwt/lib/?.lua;;G:/openresty-1.21.4.1-win64/lualib/?.lua;;'
 local cjson = require "cjson"
 local jwt = require "resty.jwt"
 local secret_key = "lua-resty-jwt"
@@ -11,4 +12,4 @@ local jwt_obj = {
     payload = { foo = "bar" }
 }
 local jwt_token = jwt:sign(secret_key, jwt_obj)
-ngx.say(jwt_token)
+print(jwt_token)
