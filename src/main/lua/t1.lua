@@ -20,10 +20,30 @@ local myffi = ffi.load('F:/IdeaProject/openresty/openresty/src/main/lua/dll/myff
 ffi.cdef([[
 int add(int x, int y);   /* don't forget to declare */
 int printf(const char *fmt, ...);
+typedef struct foo {
+    int a, b;
+} foo_t;  // Declare a struct and typedef.
+
+int do_foo(foo_t *f, int n);
 ]])
 
 
 -- 要计算的数据
-local res =  myffi.add(1, 2)
+local res =  myffi.add(20, 5000)
 print(res)  -- output: 3   Note: please use luajit to run this script.
-ffi.C.printf("Hello %s!", "world")
+C.printf("Hello %s %f!\n", "world",res)
+-- 创建foo_t实例并赋值
+local foo = ffi.new("foo_t", {10, 20})
+
+-- 调用do_foo
+local result = myffi.do_foo(foo, 5)
+C.printf("Hello  %d\n",  ffi.cast("int", result))
+local num = 123  -- 假设这是你想打印的值
+print(num)  -- 使用Lua的print
+ffi.C.printf("The number is: %d\n", num)  -- 使用C的printf
+ffi.C.printf("The number is: %d\n", ffi.cast("int", 123))
+print("do_foo returned: ", result)
+--foo.a=1
+--foo.b=2
+--f = myffi.do_foo(foo,10)
+--C.printf("Hello %d", f)
